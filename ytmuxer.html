@@ -1,7 +1,7 @@
 <html html5>
 
 <head>
-<title>ytplay</title>
+<title>ytmuxer</title>
 </head>
 
 <body>
@@ -21,7 +21,9 @@ SEEK2: <input type="text" id="videoseek2" value="0">
 <br>
 <br>
 <input type="button" value="Play Both" onclick="setVideos();">
-<input type="button" value="Restart Both" onclick="restartVideos();">
+<input type="button" value="Pause Both" onclick="pauseVideos();">
+<input type="button" value="Unpause Both" onclick="unpauseVideos();">
+<!--<input type="button" value="Restart Both" onclick="restartVideos();">-->
 </form>
 
 
@@ -83,6 +85,16 @@ function restartVideos(event) {
 	player1.playVideo();
 	player2.playVideo();
 }
+
+function pauseVideos(event) {
+	player1.pauseVideo();
+	player2.pauseVideo();
+}
+function unpauseVideos(event) {
+	player1.playVideo();
+	player2.playVideo();
+}
+
 </script>
 
 <script>
