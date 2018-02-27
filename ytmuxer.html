@@ -1,0 +1,147 @@
+<html html5>
+
+<head>
+<title>ytplay</title>
+</head>
+
+<body>
+
+<form>
+PLAYCODE: <input type="text" id="playcode" size=50
+ value="wuGhDA-5Wkc|100|56+HL_3D4b3UZM|8|0">
+<br>
+<p>If PlayCode is blank, use these values:</p>
+VID1: <input type="text" id="videoid1" value="wuGhDA-5Wkc">
+VOL1: <input type="text" id="videovol1" value="100">
+SEEK1: <input type="text" id="videoseek1" value="56">
+<br>
+VID2: <input type="text" id="videoid2" value="HL_3D4b3UZM">
+VOL2: <input type="text" id="videovol2" value="8">
+SEEK2: <input type="text" id="videoseek2" value="0">
+<br>
+<br>
+<input type="button" value="Play Both" onclick="setVideos();">
+<input type="button" value="Restart Both" onclick="restartVideos();">
+</form>
+
+
+<div id="player1-tag"></div>
+<div id="player2-tag"></div>
+
+<script>
+
+function parsePlayCode(pcode) {
+	vids = pcode.split("+");
+	vids.forEach(function(val,idx) {
+		vids[idx] = val.split("|");
+	});
+	return vids;
+}
+
+function setVideos(event) {
+	console.log("setVideo("+videoid1+","+videoid2+")");
+	console.log(player1 + "," + player2);
+	pcode = document.getElementById("playcode").value;
+	if(pcode) {
+		console.log("parsing playcode");
+		vids = parsePlayCode(pcode);
+		videoid1 = vids[0][0];
+		videovol1 = vids[0][1];
+		videoseek1 = vids[0][2];
+		videoid2 = vids[1][0];
+		videovol2 = vids[1][1];
+		videoseek2 = vids[1][2];
+	}
+	else {
+		console.log("using separate video ids");
+		videoid1 = document.getElementById("videoid1").value;
+		videovol1 = parseInt(document.getElementById("videovol1").value);
+		videoseek1 = parseInt(document.getElementById("videoseek1").value);
+		videoid2 = document.getElementById("videoid2").value;
+		videovol2 = parseInt(document.getElementById("videovol2").value);
+		videoseek2 = parseInt(document.getElementById("videoseek2").value);
+	}
+	player1.cueVideoById({videoId:videoid1});
+	player2.cueVideoById({videoId:videoid2});
+	player1.setVolume(videovol1);
+	player2.setVolume(videovol2);
+
+	// wantSeek is a bugfix
+	// i could find no way to get the videos to start at t=0
+	// unless the video was already playing (ie after a delay)
+	// so i wait until the video is playing (onPlayerStateChange==1)
+	// and if wantSeek is true, then I seekTo(0) 
+
+	player1.wantSeek = videoseek1;
+	player1.playVideo();
+	player2.wantSeek = videoseek2;
+	player2.playVideo();
+}
+function restartVideos(event) {
+	player1.seekTo(0, true);
+	player2.seekTo(0, true);
+	player1.playVideo();
+	player2.playVideo();
+}
+</script>
+
+<script>
+  // Load YouTube iFrame API and call onYouTubeIframeAPIReady()
+
+  var tag = document.createElement('script');
+  tag.id = 'iframe-api-script';
+  tag.src = 'https://www.youtube.com/iframe_api';
+
+  // ensure that the iFrame API is the first script in the document
+  // why this matters, i don't know.
+  var firstScriptTag = document.getElementsByTagName('script')[0];
+  firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+</script>
+
+<script>
+var player1, player2;
+function onYouTubeIframeAPIReady()
+{
+	console.log("onYTiFrameAPIReady");
+	playerCommonParams = {
+		width: '400',
+		height: '200',
+        	events: {
+        		'onReady': onPlayerReady,
+			'onStateChange': onPlayerStateChange,
+			'onError': onPlayerError,
+        	}
+	};
+	player1 = new YT.Player('player1-tag', playerCommonParams);
+	player1.playerIndex = 0;
+	player1.wantSeek = false;
+	player2 = new YT.Player('player2-tag', playerCommonParams);
+	player2.playerIndex = 1;
+	player2.wantSeek = false;
+}
+function onPlayerReady(event)
+{
+	var p = event.target;
+	console.log("onPlayerReady("+p.playerIndex+")");
+}
+function onPlayerError(event)
+{
+	var err_id = event.data;
+	console.log("onPlayerError: " + err_id);
+}
+function onPlayerStateChange(event)
+{
+	var p = event.target;
+	var state = event.data;
+	console.log("onPlayerStateChange("+p.playerIndex+","+state+")");
+
+	if(state == 1 && p.wantSeek !== false) {
+		p.seekTo(p.wantSeek, true);
+		p.wantSeek = false;
+	}
+}
+</script>
+
+</body>
+</html>
+
